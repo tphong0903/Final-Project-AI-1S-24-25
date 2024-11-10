@@ -148,34 +148,59 @@ def SetTKB(value, x, rows, phong):
     return rows
 
 def create_table(rows):
-    st.table(pd.DataFrame(rows, columns=["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"]))
+    df = pd.DataFrame(rows, columns=["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"])
+    df.insert(0, "", ["7h->10h30", "11h30->15h", "16h->19h30"])
+    df = df.reset_index(drop=True)
+    df = df.fillna("")
+    st.dataframe(df, width=1000,hide_index=True,use_container_width=True) 
+
+def display_schedule(data, selected_id, entities):
+    rows = np.empty((3, 6), dtype=object)
+    rows[:] = np.nan
+    phong = ["A101", "A102", "A103", "B101", "B102", "B103","A104","A105","A106","B104", "B105", "B106"]
+
+    for entity in entities:
+        if entity.id == selected_id:
+            for subject in entity.subjects:
+                SetTKB(data[subject], subject, rows, phong)
+            create_table(rows)
 
 st.title("Sắp xếp TKB")
+
 uploaded_file = st.file_uploader("Chọn file Excel", type="xlsx")
 
-if uploaded_file is not None:
-    data, listClass, listTeacher = SapXep(uploaded_file)
+if "data" not in st.session_state:
+    st.session_state.data = None
+    st.session_state.listClass = None
+    st.session_state.listTeacher = None
+
+if st.button("Sắp xếp"):    
+    if uploaded_file is not None:
+        data, listClass, listTeacher = SapXep(uploaded_file)
+        if all([data, listClass, listTeacher]):
+            # Store in session state
+            st.session_state.data = data
+            st.session_state.listClass = listClass
+            st.session_state.listTeacher = listTeacher
+        else:
+            st.error("Lỗi khi xử lý dữ liệu! Vui lòng kiểm tra file đầu vào.")
+    else:
+        st.error("Vui lòng chọn file")
+
+data = st.session_state.data
+listClass = st.session_state.listClass
+listTeacher = st.session_state.listTeacher
+
+if all([data, listClass, listTeacher]):
     option = st.selectbox("Chọn loại", ["Giáo Viên", "Lớp"])
-    
     if option == "Giáo Viên":
         selected_teacher = st.selectbox("Chọn giáo viên", [teacher.id for teacher in listTeacher])
-        if st.button("In TKB"):
-            for gv in listTeacher:
-                if gv.id == selected_teacher:
-                    rows = np.empty((3, 6), dtype=object)
-                    rows[:] = np.nan
-                    phong = ["A101", "A102", "A103", "B101", "B102", "B103"]
-                    for subject in gv.subjects:
-                        SetTKB(data[subject], subject, rows, phong)
-                    create_table(rows)
-    elif option == "Lớp":
+        if st.button("In TKB", key="print_teacher"):
+            display_schedule(data, selected_teacher, listTeacher)
+            
+    else:
         selected_class = st.selectbox("Chọn lớp", [cls.id for cls in listClass])
-        if st.button("In TKB"):
-            for cls in listClass:
-                if cls.id == selected_class:
-                    rows = np.empty((3, 6), dtype=object)
-                    rows[:] = np.nan
-                    phong = ["A101", "A102", "A103", "B101", "B102", "B103"]
-                    for subject in cls.subjects:
-                        SetTKB(data[subject], subject, rows, phong)
-                    create_table(rows)
+        if st.button("In TKB", key="print_class"):
+            display_schedule(data, selected_class, listClass)
+
+
