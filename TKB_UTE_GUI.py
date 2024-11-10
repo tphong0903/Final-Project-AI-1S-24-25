@@ -233,7 +233,7 @@ def tphong_handle_SapXep():
     data,listClass,listTeacher = SapXep(file_path)
     if data is not None:
         for x in listTeacher:
-            optionTeacher.append(x.id)
+            optionTeacher.append(int(x.id))
         for x in listClass:
             optionClass.append(x.id)
         on_select_choice()
@@ -261,14 +261,20 @@ def tphong_handle_In():
         selected=selected_choice.get()
         if selected == "Giáo Viên":
             for gv in listTeacher:
-                if(str(gv.id) == selected_value):
-                    TKB_GV(data,gv)
-                    break
+                if(gv.id == selected_value):
+                    if(gv.subjects is None):
+                        messagebox.showinfo("Thông báo", "Không tìm thấy TKB!!")
+                    else:
+                        TKB_GV(data,gv)
+                        break
         else:
             for mon in listClass:
                 if(str(mon.id) == selected_value):
-                    TKB_GV(data,mon)
-                    break
+                    if(mon.subjects is None):
+                        messagebox.showinfo("Thông báo", "Không tìm thấy TKB!!")
+                    else:
+                        TKB_GV(data,mon)
+                        break
     else:
         print("Không có mục nào được chọn.")
 
