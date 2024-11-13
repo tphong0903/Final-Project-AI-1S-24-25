@@ -6,7 +6,6 @@ from tkinter import *
 from tkinter import ttk
 import tkinter as tk
 from tkinter import filedialog, messagebox
-
 class Teacher:
     def __init__(self, id, subjects):
         self.id = id
