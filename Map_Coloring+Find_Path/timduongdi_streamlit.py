@@ -76,6 +76,8 @@ def ve_ban_do():
     # Create the figure and axis
     fig, ax = plt.subplots()
     ax.set_title('')  
+    ax.axis('off')
+
     ax.set_xticks([])  
     ax.set_yticks([])  
 
@@ -198,7 +200,9 @@ if st.session_state["flag_anim"] == False:
         img = mpimg.imread('colored_map.png')
 
         fig, ax = plt.subplots()
-        ax.set_title('')  
+        ax.set_title('')
+        ax.axis('off')
+  
         ax.set_xticks([])  
         ax.set_yticks([])  
         ax.imshow(img, extent=[xmin-150, xmax+150, ymin-150, ymax+150], aspect='auto')
@@ -319,7 +323,8 @@ if st.session_state["flag_anim"] == False:
             map_coloring()
             img = mpimg.imread('colored_map.png')
             ax.imshow(img, extent=[xmin-150, xmax+150, ymin-150, ymax+150], aspect='auto')
-            ax.set_title('')  
+            ax.set_title('')
+            ax.axis('off')
             ax.set_xticks([])  
             ax.set_yticks([])  
             ax.axis([xmin-150, xmax+150, ymin-150, ymax+150])  
