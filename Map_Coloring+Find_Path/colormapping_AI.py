@@ -21,7 +21,7 @@ def map_coloring():
     ]
 
     color_available = [
-        'red', 'green', 'yellow', 'purple', 'cyan', 'magenta', 'orange',
+        'gray', 'green', 'yellow', 'purple', 'cyan', 'magenta', 'orange',
         'brown', 'pink', 'lime', 'olive', 'maroon', 'navy', 'teal',
         'gold', 'coral', 'salmon', 'violet', 'indigo'
     ]
@@ -69,12 +69,13 @@ def map_coloring():
     for k, v in result.items():
         print(k, '==>', v)
 
-    image = cv2.imread('Map_Coloring+Find_Path/input.png', cv2.IMREAD_GRAYSCALE)
+
+    image = cv2.imread('Map_Coloring+Find_Path\input.png', cv2.IMREAD_GRAYSCALE)
     M, N = image.shape
     image_color = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
 
     color_map = {
-        'red': (0, 0, 255),
+        'gray': (104,104,104),
         'green': (0, 255, 0),
         'yellow': (0, 255, 255),
         'purple': (128, 0, 128),

@@ -8,33 +8,33 @@ import numpy as np
 from colormapping_AI import *
 
 provinces_map = UndirectedGraph(dict(
-    TayNinh=dict(BinhPhuoc=50, BinhDuong=30, DongNai=100, TPHCM=80),
-    BinhPhuoc=dict(TayNinh=50, BinhDuong=60),
-    BinhDuong=dict(TayNinh=30, BinhPhuoc=60, TPHCM=50),
-    DongNai=dict(TayNinh=100, TPHCM=60, BinhDuong=70),
+    TayNinh=dict(BinhPhuoc=50, BinhDuong=30, LongAn=100, TPHCM=80),
+    BinhPhuoc=dict(TayNinh=50, BinhDuong=60,DongNai=50),
+    BinhDuong=dict(TayNinh=30, BinhPhuoc=60, TPHCM=50,DongNai=50),
+    DongNai=dict(BinhPhuoc=50, TPHCM=60, BinhDuong=70,BRVT=30),
     BRVT=dict(TPHCM=70, DongNai=120),
     TPHCM=dict(TayNinh=80, BinhDuong=50, DongNai=60, BRVT=70, LongAn=40, TienGiang=60),
-    LongAn=dict(TPHCM=40, TienGiang=50),
-    TienGiang=dict(TPHCM=60, LongAn=50, BenTre=30),
-    BenTre=dict(TienGiang=30, TraVinh=40),
-    TraVinh=dict(BenTre=40, VinhLong=50),
-    VinhLong=dict(TraVinh=50, DongThap=60),
-    DongThap=dict(VinhLong=60, AnGiang=70),
-    AnGiang=dict(DongThap=70, CanTho=80),
-    CanTho=dict(AnGiang=80, SocTrang=50),
-    SocTrang=dict(CanTho=50, HauGiang=30),
-    HauGiang=dict(SocTrang=30, KienGiang=40),
-    KienGiang=dict(HauGiang=40, CaMau=90),
+    LongAn=dict(TPHCM=40, TienGiang=50,TayNinh=100,DongThap=30),
+    TienGiang=dict(TPHCM=60, LongAn=50, BenTre=30,DongThap=40,VinhLong=40),
+    BenTre=dict(TienGiang=30, TraVinh=40,VinhLong=40),
+    TraVinh=dict(BenTre=40, VinhLong=50,SocTrang=40),
+    VinhLong=dict(TraVinh=50, DongThap=60,BenTre=40,TienGiang=40,SocTrang=40,CanTho=40,HauGiang=40),
+    DongThap=dict(VinhLong=60, AnGiang=70,TienGiang=40,LongAn=30,CanTho=40),
+    AnGiang=dict(DongThap=70, CanTho=80,KienGiang=60),
+    CanTho=dict(AnGiang=80,DongThap=40,VinhLong=40,HauGiang=50,KienGiang=50),
+    SocTrang=dict( HauGiang=30,TraVinh=40,VinhLong=40,SocTrang=40),
+    HauGiang=dict(SocTrang=30, KienGiang=40,CanTho=50,VinhLong=40,BacLieu=40),
+    KienGiang=dict(HauGiang=40, CaMau=90,AnGiang=60,CanTho=50,BacLieu=60),
     CaMau=dict(KienGiang=90, BacLieu=60),
-    BacLieu=dict(CaMau=60)
+    BacLieu=dict(CaMau=60, KienGiang=60, SocTrang=40,HauGiang=40)
 ))
 
 provinces_map.locations = dict(
     TayNinh=(554, 500), BinhPhuoc=(700, 550), BinhDuong=(657, 430), DongNai=(760, 430),
     BRVT=(765, 330), TPHCM=(650, 360), LongAn=(554, 350), TienGiang=(554, 300),
-    BenTre=(630, 250), TraVinh=(600, 180), VinhLong=(520, 250), DongThap=(450, 350),
-    AnGiang=(380, 330), CanTho=(430, 250), SocTrang=(550, 150), HauGiang=(450, 180),
-    KienGiang=(380, 200), CaMau=(380, 50), BacLieu=(450, 100)
+    BenTre=(630, 250), TraVinh=(600, 180), VinhLong=(520, 240), DongThap=(450, 330),
+    AnGiang=(380, 320), CanTho=(430, 250), SocTrang=(550, 150), HauGiang=(450, 180),
+    KienGiang=(380, 200), CaMau=(365, 50), BacLieu=(440, 100)
 )
 
 
