@@ -2,17 +2,19 @@ import cv2
 import numpy as np
 from simpleai.search import CspProblem, backtrack
 
+
 def constraint_func(names, values):
     return values[0] != values[1]
 
+
 def map_coloring():
     names = ('TayNinh', 'BinhPhuoc', 'BinhDuong', 'DongNai', 'BRVT',
-             'TPHCM', 'LongAn','TienGiang', 'BenTre', 'TraVinh', 
-             'VinhLong', 'DongThap', 'AnGiang', 'CanTho','SocTrang', 
-             'HauGiang', 'KienGiang', 'CaMau', 'BacLieu', )
+             'TPHCM', 'LongAn', 'TienGiang', 'BenTre', 'TraVinh',
+             'VinhLong', 'DongThap', 'AnGiang', 'CanTho', 'SocTrang',
+             'HauGiang', 'KienGiang', 'CaMau', 'BacLieu',)
 
     names_point = [
-        (391, 105),(500, 64), (459, 146), (534, 157), (545, 233),
+        (391, 105), (500, 64), (459, 146), (534, 157), (545, 233),
         (470, 210), (397, 220), (401, 256), (440, 289), (419, 335),
         (375, 300), (308, 226), (269, 239), (307, 294), (367, 371),
         (336, 338), (266, 335), (252, 437), (309, 408)
@@ -67,6 +69,7 @@ def map_coloring():
     for k, v in result.items():
         print(k, '==>', v)
 
+
     image = cv2.imread('Map_Coloring+Find_Path\input.png', cv2.IMREAD_GRAYSCALE)
     M, N = image.shape
     image_color = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
@@ -100,8 +103,8 @@ def map_coloring():
         cv2.floodFill(image_color, mask, point, color)
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(image_color, province, (point[0] - 15, point[1] - 8), font, 0.3, (0, 0, 0), 1, cv2.LINE_AA)
-    
+
     image_resized = cv2.resize(image_color, (900, 600))
-    cv2.imwrite('colored_map.png', image_resized)
+    cv2.imwrite('Map_Coloring+Find_Path/colored_map.png', image_resized)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
