@@ -109,11 +109,16 @@ def ve_ban_do():
 
 
 def ve_mui_ten(b, a, tx, ty):
-    p_mui_ten = [(0,0,1), (-20,10,1), (-15,0,1), (-20,-10,1)]
+    scale = 1.5
+    scale_matrix = np.array([[scale, 0, 0],
+                         [0, scale, 0],
+                         [0, 0, 1]], np.float32)
+      
     p_mui_ten_ma_tran = [np.array([[0],[0],[1]],np.float32),
                             np.array([[-20],[10],[1]],np.float32),
                             np.array([[-15],[0],[1]],np.float32),
                             np.array([[-20],[-10],[1]],np.float32)]
+    p_mui_ten_ma_tran=[scale_matrix @ point for point in p_mui_ten_ma_tran]
 
     # Tạo ma trận dời (tịnh tiến) - translate
     M1 = np.array([[1, 0, tx], 
