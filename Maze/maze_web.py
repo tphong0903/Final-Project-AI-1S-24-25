@@ -1,13 +1,14 @@
 import streamlit as st
 import numpy as np
 from PIL import Image
+from PIL import Image, ImageDraw
 from streamlit_drawable_canvas import st_canvas
 import pandas as pd
 import math
 from simpleai.search import SearchProblem, astar, breadth_first, depth_first
 import time
 
-# Define cost of moving around the map
+# Define cost of moving around the  MAP
 cost_regular = 1.0
 cost_diagonal = 1.7
 
@@ -17,13 +18,9 @@ COSTS = {
     "down": cost_regular,
     "left": cost_regular,
     "right": cost_regular,
-    "up left": cost_diagonal,
-    "up right": cost_diagonal,
-    "down left": cost_diagonal,
-    "down right": cost_diagonal,
 }
 
-# Define the map
+# Define the  MAP
 MAP = """
 ##################################
 #         #              #       #
@@ -43,7 +40,7 @@ MAP = """
 ##################################
 """
 
-# Convert map to a list
+# Convert  MAP to a list
 MAP = [list(x) for x in MAP.split("\n") if x]
 MAP2 = MAP
 M = len(MAP)
@@ -103,162 +100,160 @@ class MazeSolver(SearchProblem):
 st.title("Maze Solver")
 if "current_step" not in st.session_state:
     st.session_state["current_step"] = 0
+if "dem" not in st.session_state:
+    st.session_state["dem"] = 0
 if "listImage" not in st.session_state:
     st.session_state["listImage"] = []
 if "is_auto_running" not in st.session_state:
     st.session_state["is_auto_running"] = False
+if "bg_image" not in st.session_state:
+    bg_image = Image.open("Maze/maze.bmp")
+    st.session_state["bg_image"] = bg_image
+if "points" not in st.session_state:
+    st.session_state["points"] = []
+
+canvas_placeholder = st.empty()
+with canvas_placeholder.container():
+    canvas_result = st_canvas(
+        fill_color="rgba(255, 165, 0, 0.3)",
+        stroke_width=7,
+        stroke_color="red",
+        background_image=st.session_state["bg_image"],
+        update_streamlit=True,
+        height=336,
+        width=710,
+        point_display_radius=0,
+        drawing_mode="point"
+    )
+valid_points = []
+choice = "A*"
 
 
-class MazeApp:
-    def __init__(self):
+def display_path():
+    st.session_state["is_auto_running"] = True
+    listImage = st.session_state["listImage"]
+    for image in listImage:
+        canvas_placeholder.empty()
+        canvas_placeholder.image(image, width=710, channels="RGB")
+        time.sleep(0.5)
+    st.session_state["is_auto_running"] = False
 
-        if "objects" not in st.session_state:
-            st.session_state["objects"] = []
-        self.bg_image = Image.open("Maze/maze.bmp")
-        self.canvas_placeholder = st.empty()
-        self.valid_points = []
-        self.listImage = []
-        self.map = [row[:] for row in MAP]
-        self.canvas_result = None
-        self.problem = None
-        self.result = None
 
-    def handle_run(self, choice):
-        list_point = self.canvas_result.json_data["objects"]
-        for point in list_point:
-            px = point['left'] + 3
-            py = point['top'] + 3
-            x = int(px / 21)
-            y = int(py / 21)
+def draw_image(path):
+    listImage = []
+    for x1, y2 in path:
+        MAP[y2][x1] = 'o'
+        image = np.ones((M * W, N * W, 3), np.uint8) * 255
+        for x in range(M):
+            for y in range(N):
+                if MAP[x][y] == '#':
+                    image[x * W:(x + 1) * W, y * W:(y + 1) * W] = mau_do
+                elif MAP[x][y] == ' ':
+                    image[x * W:(x + 1) * W, y * W:(y + 1) * W] = mau_trang
+                else:
+                    image[x * W + 2:(x + 1) * W - 3, y * W + 2:(y + 1) * W - 3] = mau_xanh
+        listImage.append(image)
+    return listImage
 
-            if MAP[y][x] != '#':
-                self.valid_points.append(point)
-                st.session_state["objects"].append(point)
-        if len(self.valid_points) > 1:
 
-            start_point = self.valid_points[0]
-            goal_point = self.valid_points[1]
+def btn_next_step_click():
+    listImage = st.session_state.get("listImage")
+    if st.session_state["current_step"] < len(listImage) - 2:
+        st.session_state["current_step"] += 1
+        canvas_placeholder.empty()
+        canvas_placeholder.image(listImage[st.session_state["current_step"]], width=710, channels="RGB")
+    st.write(f"Current Step: {st.session_state['current_step']}, Total Steps: {len(listImage) - 2}")
 
-            x1 = int((start_point['left'] + 3) / 21)
-            y1 = int((start_point['top'] + 3) / 21)
-            x2 = int((goal_point['left'] + 3) / 21)
-            y2 = int((goal_point['top'] + 3) / 21)
 
-            self.map[y1][x1] = 'o'
-            self.map[y2][x2] = 'x'
+def btn_prev_step_click():
+    listImage = st.session_state.get("listImage")
+    if st.session_state["current_step"] > 0:
+        st.session_state["current_step"] -= 1
+        canvas_placeholder.image(listImage[st.session_state["current_step"]], width=710, channels="RGB")
+    st.write(f"Current Step: {st.session_state['current_step']}, Total Steps: {len(listImage) - 2}")
 
-            self.problem = MazeSolver(self.map)
-            if choice == 'A*':
-                self.result = astar(self.problem, graph_search=True)
-            elif choice == 'BFS':
-                self.result = breadth_first(self.problem, graph_search=True)
-            else:
-                self.result = depth_first(self.problem, graph_search=True)
 
-            st.session_state["objects"] = []
-            if self.result:
-                path = [x[1] for x in self.result.path()]
-                if path:
-                    self.draw_image(path)
-                    st.session_state["listImage"] = self.listImage
-        else:
-            st.error("Điểm không hợp lệ sẽ bị xóa sau 2s, vui lòng chọn điểm khác")
-            time.sleep(2)
-            self.update_canvas()
-
-    def display_path(self):
-        st.session_state["is_auto_running"] = True
-        self.listImage = st.session_state.get("listImage", [])
-        for image in self.listImage:
-            self.canvas_placeholder.image(image, width=710, channels="RGB")
-            time.sleep(0.5)
-        st.session_state["is_auto_running"] = False
-
-    def draw_image(self, path):
-        for x1, y2 in path:
-            self.map[y2][x1] = 'o'
+if canvas_result.json_data is not None:
+    list_point = canvas_result.json_data["objects"]
+    if len(list_point) > 0:
+        px = list_point[-1]['left']
+        py = list_point[-1]['top']
+        x1 = int(px // 21)
+        y1 = int(py // 21)
+        if MAP[y1][x1] != '#':
+            MAP[y1][x1] = 'o'
+            if st.session_state["dem"] < 2:
+                st.session_state["dem"] += 1
+            st.session_state["points"].append((x1, y1))
             image = np.ones((M * W, N * W, 3), np.uint8) * 255
             for x in range(M):
                 for y in range(N):
-                    if self.map[x][y] == '#':
+                    if MAP[x][y] == '#':
                         image[x * W:(x + 1) * W, y * W:(y + 1) * W] = mau_do
-                    elif self.map[x][y] == ' ':
+                    elif MAP[x][y] == ' ':
                         image[x * W:(x + 1) * W, y * W:(y + 1) * W] = mau_trang
-                    else:
-                        image[x * W + 2:(x + 1) * W - 3, y * W + 2:(y + 1) * W - 3] = mau_xanh
-            self.listImage.append(image)
-
-    def update_canvas(self):
-        self.canvas_result = st_canvas(
-            fill_color="rgba(255, 165, 0, 0.3)",
-            stroke_width=7,
-            stroke_color="red",
-            background_image=self.bg_image,
-            update_streamlit=True,
-            height=336,
-            width=710,
-            drawing_mode="point",
-            initial_drawing={"objects": st.session_state["objects"]}
-        )
-
-    def btn_next_step_click(self):
-        self.listImage = st.session_state.get("listImage")
-        if st.session_state["current_step"] < len(self.listImage) - 2:
-            st.session_state["current_step"] += 1
-            self.canvas_placeholder.empty()
-            self.canvas_placeholder.image(self.listImage[st.session_state["current_step"]], width=710, channels="RGB")
-        st.write(f"Current Step: {st.session_state['current_step']}, Total Steps: {len(self.listImage) - 2}")
-
-    def btn_prev_step_click(self):
-        self.listImage = st.session_state.get("listImage")
-        if st.session_state["current_step"] > 0:
-            st.session_state["current_step"] -= 1
-            print(st.session_state["current_step"])
-            self.canvas_placeholder.image(self.listImage[st.session_state["current_step"]], width=710, channels="RGB")
-        st.write(f"Current Step: {st.session_state['current_step']}, Total Steps: {len(self.listImage) - 2}")
-
-    def run(self):
-        with self.canvas_placeholder.container():
-            self.update_canvas()
-        col1, col2, col3 = st.columns([1, 1, 1])
-        if st.button("Reset"):
-            st.session_state["objects"] = []
-            st.session_state["listImage"] = []
-            st.session_state["current_step"] = 0
-            self.valid_points = []
-            self.map = MAP
-            st.session_state["result2_ready"] = False
-            st.session_state["is_auto_running"] = False
-
-        choice = st.selectbox("Chọn thuật toán:", options=['A*', 'BFS', 'DFS'])
-        if st.button("Run"):
-            self.handle_run(choice)
-            st.session_state["result2_ready"] = True
-
-        if st.session_state.get("result2_ready", False):
-            prev_disabled = st.session_state["current_step"] <= 0 or st.session_state["is_auto_running"]
-            next_disabled = st.session_state["current_step"] >= len(st.session_state.get("listImage", [])) - 3 or \
-                            st.session_state["is_auto_running"]
-
-            with col1:
-                if st.button("Prev", disabled=prev_disabled):
-                    self.btn_prev_step_click()
-            with col2:
-                if st.session_state["is_auto_running"]:
-                    if st.button("Stop Auto"):
-                        st.session_state["is_auto_running"] = False
-                else:
-                    if st.button("Auto"):
-                        self.display_path()
-            with col3:
-                if st.button("Next", disabled=next_disabled):
-                    self.btn_next_step_click()
+            for point in st.session_state["points"]:
+                px, py = point
+                image[py * W + 2:(py + 1) * W - 3, px * W + 2:(px + 1) * W - 3] = mau_xanh
+            st.session_state["bg_image"] = Image.fromarray(image)
+            st.rerun()
 
 
-def main():
-    app = MazeApp()
-    app.run()
+def handle_run():
+    if len(st.session_state["points"]) >= 2:
+        x1 = st.session_state["points"][0][0]
+        y1 = st.session_state["points"][0][1]
+
+        x2 = st.session_state["points"][1][0]
+        y2 = st.session_state["points"][1][1]
+
+        MAP[y1][x1] = 'o'
+        MAP[y2][x2] = 'x'
+        problem = MazeSolver(MAP)
+        if choice == 'A*':
+            result = astar(problem, graph_search=True)
+        elif choice == 'BFS':
+            result = breadth_first(problem, graph_search=True)
+        else:
+            result = depth_first(problem, graph_search=True)
+
+        if result:
+            path = [x[1] for x in result.path()]
+            if path:
+                st.session_state["listImage"] = draw_image(path)
 
 
-if __name__ == "__main__":
-    main()
+col1, col2, col3 = st.columns([1, 1, 1])
+if st.button("Reset"):
+    st.session_state["listImage"] = []
+    st.session_state["current_step"] = 0
+    st.session_state["bg_image"] = Image.open("Maze/maze.bmp")
+    valid_points = []
+    MAP = MAP2
+    st.session_state["points"] = []
+    st.session_state["result2_ready"] = False
+    st.session_state["is_auto_running"] = False
+
+choice = st.selectbox("Chọn thuật toán:", options=['A*', 'BFS', 'DFS'])
+if st.button("Run"):
+    st.session_state["result2_ready"] = True
+    handle_run()
+
+if st.session_state.get("result2_ready", False):
+    prev_disabled = st.session_state["current_step"] <= 0 or st.session_state["is_auto_running"]
+    next_disabled = st.session_state["current_step"] >= len(st.session_state.get("listImage", [])) - 3 or \
+                    st.session_state["is_auto_running"]
+
+    with col1:
+        if st.button("Prev", disabled=prev_disabled):
+            btn_prev_step_click()
+    with col2:
+        if st.session_state["is_auto_running"]:
+            if st.button("Stop Auto"):
+                st.session_state["is_auto_running"] = False
+        else:
+            if st.button("Auto"):
+                display_path()
+    with col3:
+        if st.button("Next", disabled=next_disabled):
+            btn_next_step_click()
