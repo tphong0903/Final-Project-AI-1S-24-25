@@ -5,7 +5,6 @@ import tkinter.ttk as ttk
 from PIL import Image, ImageTk
 import time
 import numpy as np
-from colormapping_AI import *
 
 provinces_map = UndirectedGraph(dict(
     TayNinh=dict(BinhPhuoc=50, BinhDuong=30, LongAn=100, TPHCM=80),
@@ -54,8 +53,6 @@ class App(tk.Tk):
         self.title('Search')
         self.cvs_map = tk.Canvas(self, width=840, height=680, relief=tk.SUNKEN, border=1)
 
-        # Add the background image
-        map_coloring()
         self.add_image_to_bottom()
         self.ve_ban_do()
         lbl_frm_menu = tk.LabelFrame(self)
