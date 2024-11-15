@@ -5,11 +5,9 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import matplotlib.image as mpimg
 
-
 import numpy as np
 from colormapping_AI import map_coloring
 from search import *
-
 
 provinces_map = UndirectedGraph(dict(
     TayNinh=dict(BinhPhuoc=50, BinhDuong=30, LongAn=100, TPHCM=80),
@@ -60,8 +58,6 @@ provinces_map.locations = dict(
 map_locations = provinces_map.locations
 graph_dict = provinces_map.graph_dict
 
-
-
 xmin = 91
 xmax = 562
 ymin = 270
@@ -70,23 +66,23 @@ ymax = 570
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
+
 def ve_ban_do():
     map_coloring()
-    img = mpimg.imread('colored_map.png')
+    img = mpimg.imread('Map_Coloring+Find_Path/colored_map.png')
 
     # Create the figure and axis
     fig, ax = plt.subplots()
-    ax.set_title('')  
+    ax.set_title('')
     ax.axis('off')
 
-    ax.set_xticks([])  
-    ax.set_yticks([])  
+    ax.set_xticks([])
+    ax.set_yticks([])
 
+    ax.imshow(img, extent=[xmin - 150, xmax + 150, ymin - 150, ymax + 150], aspect='auto')
 
-    ax.imshow(img, extent=[xmin-150, xmax+150, ymin-150, ymax+150], aspect='auto')
-    
-    ax.axis([xmin-150, xmax+150, ymin-150, ymax+150])  
-# Increase extent to zoom in
+    ax.axis([xmin - 150, xmax + 150, ymin - 150, ymax + 150])
+    # Increase extent to zoom in
     # Plot the cities and paths over the image
     for key in graph_dict:
         city = graph_dict[key]
@@ -97,7 +93,6 @@ def ve_ban_do():
         diem, = ax.plot(x0, y0, 's', color='#00008B')
 
         # Add city labels
-        
 
         # Plot the paths between cities
         for neighbor in city:
@@ -108,29 +103,28 @@ def ve_ban_do():
     return fig
 
 
-
 def ve_mui_ten(b, a, tx, ty):
     scale = 1.5
     scale_matrix = np.array([[scale, 0, 0],
-                         [0, scale, 0],
-                         [0, 0, 1]], np.float32)
-      
-    p_mui_ten_ma_tran = [np.array([[0],[0],[1]],np.float32),
-                            np.array([[-20],[10],[1]],np.float32),
-                            np.array([[-15],[0],[1]],np.float32),
-                            np.array([[-20],[-10],[1]],np.float32)]
-    p_mui_ten_ma_tran=[scale_matrix @ point for point in p_mui_ten_ma_tran]
+                             [0, scale, 0],
+                             [0, 0, 1]], np.float32)
+
+    p_mui_ten_ma_tran = [np.array([[0], [0], [1]], np.float32),
+                         np.array([[-20], [10], [1]], np.float32),
+                         np.array([[-15], [0], [1]], np.float32),
+                         np.array([[-20], [-10], [1]], np.float32)]
+    p_mui_ten_ma_tran = [scale_matrix @ point for point in p_mui_ten_ma_tran]
 
     # Tạo ma trận dời (tịnh tiến) - translate
-    M1 = np.array([[1, 0, tx], 
-                    [0, 1, ty], 
-                    [0, 0, 1]], np.float32)
+    M1 = np.array([[1, 0, tx],
+                   [0, 1, ty],
+                   [0, 0, 1]], np.float32)
 
     # Tạo ma trận quay - rotation
     theta = np.arctan2(b, a)
     M2 = np.array([[np.cos(theta), -np.sin(theta), 0],
-                    [np.sin(theta),  np.cos(theta), 0],
-                    [     0,             0,        1]], np.float32)
+                   [np.sin(theta), np.cos(theta), 0],
+                   [0, 0, 1]], np.float32)
 
     M = np.matmul(M1, M2)
 
@@ -138,9 +132,8 @@ def ve_mui_ten(b, a, tx, ty):
 
     for p in p_mui_ten_ma_tran:
         q = np.matmul(M, p)
-        q_mui_ten.append([q[0,0], q[1,0]])
-    return q_mui_ten 
-
+        q_mui_ten.append([q[0, 0], q[1, 0]])
+    return q_mui_ten
 
 
 if "flag_anim" not in st.session_state:
@@ -162,16 +155,14 @@ if st.session_state["flag_anim"] == False:
         else:
             print('Đã vẽ bản đồ')
             st.pyplot(st.session_state['fig'])
-    
+
     lst_provinces = [province for province in provinces_map.locations]
 
     start_city = st.selectbox('Bạn chọn thành phố bắt đầu:', lst_provinces)
     dest_city = st.selectbox('Bạn chọn thành phố đích:', lst_provinces)
 
-   
     st.session_state['start_city'] = start_city
-    st.session_state['dest_city']  = dest_city
-
+    st.session_state['dest_city'] = dest_city
 
     if st.button('Direction'):
         if start_city is dest_city:
@@ -183,8 +174,8 @@ if st.session_state["flag_anim"] == False:
         print('Con duong tim thay: ')
 
         for data in lst_path:
-            city = data.state 
-            print(city, end = ' ')
+            city = data.state
+            print(city, end=' ')
         print()
         path_locations = {}
         for data in lst_path:
@@ -208,13 +199,12 @@ if st.session_state["flag_anim"] == False:
         fig, ax = plt.subplots()
         ax.set_title('')
         ax.axis('off')
-  
-        ax.set_xticks([])  
-        ax.set_yticks([])  
-        ax.imshow(img, extent=[xmin-150, xmax+150, ymin-150, ymax+150], aspect='auto')
-    
-        ax.axis([xmin-150, xmax+150, ymin-150, ymax+150])  
 
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.imshow(img, extent=[xmin - 150, xmax + 150, ymin - 150, ymax + 150], aspect='auto')
+
+        ax.axis([xmin - 150, xmax + 150, ymin - 150, ymax + 150])
 
         for key in graph_dict:
             city = graph_dict[key]
@@ -222,8 +212,6 @@ if st.session_state["flag_anim"] == False:
             y0 = map_locations[key][1]
 
             diem, = ax.plot(x0, y0, 's', color='#00008B')
-
-           
 
             for neighbor in city:
                 x1 = map_locations[neighbor][0]
@@ -245,8 +233,8 @@ if st.session_state["flag_anim"] == False:
         print('Con duong tim thay: ')
 
         for data in lst_path:
-            city = data.state 
-            print(city, end = ' ')
+            city = data.state
+            print(city, end=' ')
         print()
         path_locations = {}
         for data in lst_path:
@@ -264,7 +252,6 @@ if st.session_state["flag_anim"] == False:
         print(lst_path_location_x)
         print(lst_path_location_y)
 
-
         fig, ax = plt.subplots()
 
         dem = 0
@@ -277,8 +264,6 @@ if st.session_state["flag_anim"] == False:
 
             diem, = ax.plot(x0, y0, 's', color='#00008B')
             lst_doan_thang.append(diem)
-
-            
 
             for neighbor in city:
                 x1 = map_locations[neighbor][0]
@@ -298,49 +283,49 @@ if st.session_state["flag_anim"] == False:
         lst_vi_tri = []
 
         L = len(lst_path_location_x)
-        for i in range(0,L-1):
+        for i in range(0, L - 1):
             x1 = lst_path_location_x[i]
             y1 = lst_path_location_y[i]
-            x2 = lst_path_location_x[i+1]
-            y2 = lst_path_location_y[i+1]
+            x2 = lst_path_location_x[i + 1]
+            y2 = lst_path_location_y[i + 1]
 
-            b = y2-y1
-            a = x2-x1
+            b = y2 - y1
+            a = x2 - x1
 
-
-            d0 = np.sqrt((x2-x1)**2 + (y2-y1)**2)
-            N0 = int(N*d0/d)
-            dt = 1/(N0-1)
+            d0 = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+            N0 = int(N * d0 / d)
+            dt = 1 / (N0 - 1)
             for j in range(0, N0):
-                t = j*dt
-                x = x1 + (x2-x1)*t
-                y = y1 + (y2-y1)*t
+                t = j * dt
+                x = x1 + (x2 - x1) * t
+                y = y1 + (y2 - y1) * t
 
-                q = ve_mui_ten(b,a,x,y)
+                q = ve_mui_ten(b, a, x, y)
                 lst_vi_tri.append(q)
 
-
-
-        blue_polygon, = ax.fill([],[], color = 'blue')
+        blue_polygon, = ax.fill([], [], color='blue')
 
         FRAME = len(lst_vi_tri)
+
 
         def init():
             map_coloring()
             img = mpimg.imread('colored_map.png')
-            ax.imshow(img, extent=[xmin-150, xmax+150, ymin-150, ymax+150], aspect='auto')
+            ax.imshow(img, extent=[xmin - 150, xmax + 150, ymin - 150, ymax + 150], aspect='auto')
             ax.set_title('')
             ax.axis('off')
-            ax.set_xticks([])  
-            ax.set_yticks([])  
-            ax.axis([xmin-150, xmax+150, ymin-150, ymax+150])  
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.axis([xmin - 150, xmax + 150, ymin - 150, ymax + 150])
 
             # Trả về nhiều đoạn thẳng và đoạn thẳng tìm được
             return lst_doan_thang, blue_polygon
 
+
         def animate(i):
             blue_polygon.set_xy(lst_vi_tri[i])
-            return lst_doan_thang, blue_polygon 
+            return lst_doan_thang, blue_polygon
+
 
         anim = FuncAnimation(fig, animate, frames=FRAME, interval=200, init_func=init, repeat=False)
 
@@ -350,10 +335,9 @@ if st.session_state["flag_anim"] == False:
 
 else:
     if st.session_state["flag_anim"] == True:
-        components.html(st.session_state["anim"].to_jshtml(), height = 550)
+        components.html(st.session_state["anim"].to_jshtml(), height=550)
         _, _, col3, _, _ = st.columns(5)
         if col3.button('Reset'):
             st.session_state["flag_anim"] = False
             st.session_state["flag_ve_ban_do"] = False
             st.rerun()
-

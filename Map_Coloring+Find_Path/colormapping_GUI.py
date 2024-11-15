@@ -4,8 +4,10 @@ from simpleai.search import CspProblem, backtrack
 import tkinter as tk
 from PIL import Image, ImageTk
 
+
 def constraint_func(names, values):
     return values[0] != values[1]
+
 
 def map_coloring():
     global steps, current_step
@@ -14,7 +16,7 @@ def map_coloring():
              'VinhLong', 'DongThap', 'AnGiang', 'CanTho','SocTrang', 
              'HauGiang', 'KienGiang', 'CaMau', 'BacLieu', )
     names_point = [
-        (391, 105),(500, 64), (459, 146), (534, 157), (545, 233),
+        (391, 105), (500, 64), (459, 146), (534, 157), (545, 233),
         (470, 210), (397, 220), (401, 256), (440, 289), (419, 335),
         (375, 300), (308, 226), (269, 239), (307, 294), (367, 371),
         (336, 338), (266, 335), (252, 437), (309, 408)
@@ -168,3 +170,4 @@ reset_button.pack(pady=5)
 reset()
 
 root.mainloop()
+
