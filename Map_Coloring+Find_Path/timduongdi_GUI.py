@@ -36,11 +36,8 @@ provinces_map.locations = dict(
     KienGiang=(380, 200), CaMau=(365, 50), BacLieu=(440, 100)
 )
 
-
-
 graph_dict = provinces_map.graph_dict
 romania_locations = provinces_map.locations
-
 
 class App(tk.Tk):
     def __init__(self):
@@ -74,17 +71,27 @@ class App(tk.Tk):
         self.cbo_dest.set('DongNai')
         self.cbo_dest.bind("<<ComboboxSelected>>", self.cbo_dest_click)
 
-        btn_direction = ttk.Button(lbl_frm_menu, text='Direction',
-                                   command=self.btn_direction_click)
-        btn_run = ttk.Button(lbl_frm_menu, text='Run',
-                             command=self.btn_run_click)
-
         lbl_dest.grid(row=2, column=0, padx=5, pady=0, sticky=tk.W)
 
         self.cbo_dest.grid(row=3, column=0, padx=5, pady=5)
 
-        btn_direction.grid(row=4, column=0, padx=5, pady=5)
-        btn_run.grid(row=5, column=0, padx=5, pady=5)
+        lbl_algorithm = ttk.Label(lbl_frm_menu, text='Algorithm')
+        self.cbo_algorithm = ttk.Combobox(lbl_frm_menu, values=['A*', 'BFS', 'DFS'])
+        self.cbo_algorithm.set('A*')
+
+        lbl_algorithm.grid(row=4, column=0, padx=5, pady=0, sticky=tk.W)
+        self.cbo_algorithm.grid(row=5, column=0, padx=5, pady=5)
+
+        btn_direction = ttk.Button(lbl_frm_menu, text='Direction',
+                                   command=self.btn_direction_click)
+        btn_run = ttk.Button(lbl_frm_menu, text='Run',
+                             command=self.btn_run_click)
+        btn_reset = ttk.Button(lbl_frm_menu, text='Reset',
+                               command=self.btn_reset_click)
+
+        btn_direction.grid(row=6, column=0, padx=5, pady=5)
+        btn_run.grid(row=7, column=0, padx=5, pady=5)
+        btn_reset.grid(row=8, column=0, padx=5, pady=5)
 
         self.cvs_map.grid(row=0, column=0, padx=5, pady=5)
         lbl_frm_menu.grid(row=0, column=1, padx=5, pady=7, sticky=tk.N)
@@ -96,7 +103,6 @@ class App(tk.Tk):
             self.cvs_map.create_rectangle(x0 - 4, y0 - 4, x0 + 4, y0 + 4,
                                           fill='blue', outline='blue')
 
-         
             for neighbor in graph_dict[city]:
                 x1 = romania_locations[neighbor][0]
                 y1 = 640 - romania_locations[neighbor][1]
@@ -110,11 +116,19 @@ class App(tk.Tk):
 
     def btn_direction_click(self):
         self.cvs_map.delete(tk.ALL)
-        self.add_image_to_bottom()  
+        self.add_image_to_bottom()
         self.ve_ban_do()
 
         romania_problem = GraphProblem(self.start, self.dest, provinces_map)
-        c = astar_search(romania_problem)
+        algorithm = self.cbo_algorithm.get()
+
+        if algorithm == 'A*':
+            c = astar_search(romania_problem)
+        elif algorithm == 'BFS':
+            c = best_first_graph_search(romania_problem, lambda n: n.path_cost)
+        elif algorithm == 'DFS':
+            c = depth_first_graph_search(romania_problem)
+
         lst_path = c.path()
         self.path_location = []
         for data in lst_path:
@@ -123,7 +137,7 @@ class App(tk.Tk):
             y = 640 - provinces_map.locations[city][1]
             self.path_location.append((x, y))
 
-        self.cvs_map.create_line(self.path_location, fill='red',width=2)
+        self.cvs_map.create_line(self.path_location, fill='red', width=2)
 
     def btn_run_click(self):
         bg_color = self.cvs_map['background']
@@ -150,44 +164,55 @@ class App(tk.Tk):
 
                 self.add_image_to_bottom()  # Ensure the image stays as the background
                 self.ve_ban_do()
-                self.cvs_map.create_line(self.path_location, fill='red',width=2)
+                self.cvs_map.create_line(self.path_location, fill='red', width=2)
 
                 self.ve_mui_ten(b, a, x, y, '#00008B')
 
                 self.update()
                 time.sleep(0.01)
+
+    def btn_reset_click(self):
+        self.cvs_map.delete(tk.ALL)
+        self.add_image_to_bottom()
+        self.ve_ban_do()
+        self.cbo_start.set('TayNinh')
+        self.cbo_dest.set('DongNai')
+        self.cbo_algorithm.set('A*')
+        self.path_location = None
+
     def ve_mui_ten(self, b, a, tx, ty, color):
-        p_mui_ten = [(0,0,1), (-20,10,1), (-15,0,1), (-20,-10,1)]
-        p_mui_ten_ma_tran = [np.array([[0],[0],[1]],np.float32),
-                             np.array([[-20],[10],[1]],np.float32),
-                             np.array([[-15],[0],[1]],np.float32),
-                             np.array([[-20],[-10],[1]],np.float32)]
+        p_mui_ten = [(0, 0, 1), (-20, 10, 1), (-15, 0, 1), (-20, -10, 1)]
+        p_mui_ten_ma_tran = [np.array([[0], [0], [1]], np.float32),
+                             np.array([[-20], [10], [1]], np.float32),
+                             np.array([[-15], [0], [1]], np.float32),
+                             np.array([[-20], [-10], [1]], np.float32)]
 
         # Tạo ma trận dời (tịnh tiến) - translate
-        M1 = np.array([[1, 0, tx], 
-                       [0, 1, ty], 
+        M1 = np.array([[1, 0, tx],
+                       [0, 1, ty],
                        [0, 0, 1]], np.float32)
 
         # Tạo ma trận quay - rotation
         theta = np.arctan2(b, a)
         M2 = np.array([[np.cos(theta), -np.sin(theta), 0],
-                       [np.sin(theta),  np.cos(theta), 0],
-                       [     0,             0,        1]], np.float32)
+                       [np.sin(theta), np.cos(theta), 0],
+                       [0, 0, 1]], np.float32)
 
         M = np.matmul(M1, M2)
 
         q_mui_ten = []
         for p in p_mui_ten_ma_tran:
             q = np.matmul(M, p)
-            q_mui_ten.append((q[0,0], q[1,0]))
+            q_mui_ten.append((q[0, 0], q[1, 0]))
 
-        self.cvs_map.create_polygon(q_mui_ten, fill = color, outline = color,width=5)
+        self.cvs_map.create_polygon(q_mui_ten, fill=color, outline=color, width=5)
+
     def add_image_to_bottom(self):
         image = Image.open('colored_map.png')
-        image = image.resize((840, 680)) 
+        image = image.resize((840, 680))
         photo = ImageTk.PhotoImage(image)
         self.bg_image = self.cvs_map.create_image(0, 0, image=photo, anchor=tk.NW)
-        self.cvs_map.image = photo  
+        self.cvs_map.image = photo
 
 
 if __name__ == '__main__':
